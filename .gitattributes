@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Ukulele Simulaator</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.1/lib/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/addons/p5.sound.min.js"></script>
+    <script>
+      let keeled = [
+        { nimi: 'G', sagedus: 392 },  // G4
+        { nimi: 'C', sagedus: 261.63 }, // C4
+        { nimi: 'E', sagedus: 329.63 }, // E4
+        { nimi: 'A', sagedus: 440 }  // A4
+      ];
+      let fretid = 12; // 12 fretid
+      let sõrmilaud = [];
+      let keeleKõrgus = 50;
+      let fretiLaius = 50;
+
+      function setup() {
+        createCanvas(800, 300);
+        textAlign(CENTER, CENTER);
+        noLoop(); // Joonistame sõrmilaua ainult korra
+
+        // Loome sõrmilaua positsioonid ja sagedused iga keele ja freti jaoks
+        for (let i = 0; i < keeled.length; i++) {
+          sõrmilaud[i] = [];
+          for (let j = 0; j <= fretid; j++) {
+            let sagedus = keeled[i].sagedus * pow(2, j / 12);  // Sagedus muutub iga freti kohta
+            sõrmilaud[i].push({ fret: j, sagedus: sagedus });
+          }
+        }
+      }
+
+      function draw() {
+        background(200);
+
+        // Joonista keeled
+        for (let i = 0; i < keeled.length; i++) {
+          stroke(0);
+          strokeWeight(2);  // Õhemad keeled
+          line(100, (i + 1) * keeleKõrgus, 100 + fretiLaius * fretid, (i + 1) * keeleKõrgus);  // Keeled sõrmilaual
+        }
+
+        // Joonista fretid ja freti numbrid
+        for (let j = 0; j <= fretid; j++) {
+          for (let i = 0; i < keeled.length; i++) {
+            fill(255);
+            stroke(0);
+            rect(100 + j * fretiLaius, i * keeleKõrgus + keeleKõrgus / 2, fretiLaius, keeleKõrgus);
+            fill(0);
+            text(`${j}`, 100 + j * fretiLaius + fretiLaius / 2, (i + 1) * keeleKõrgus + keeleKõrgus / 2);
+          }
+        }
+
+        textSize(16);
+        text('Kliki frettidel, et mängida noote!', width / 2, height - 30);
+      }
+
+      function mousePressed() {
+        // Kontrolli, kas klikiti freti peal ja mängi vastav noot
+        for (let i = 0; i < keeled.length; i++) {
+          if (mouseY > i * keeleKõrgus + keeleKõrgus / 2 && mouseY < (i + 1) * keeleKõrgus + keeleKõrgus / 2) {
+            for (let j = 0; j <= fretid; j++) {
+              if (mouseX > 100 + j * fretiLaius && mouseX < 100 + (j + 1) * fretiLaius) {
+                mängiNoot(sõrmilaud[i][j].sagedus);
+              }
+            }
+          }
+        }
+      }
+
+      function mängiNoot(sagedus) {
+        let ostsillaator = new p5.Oscillator('sine');
+        ostsillaator.freq(sagedus);
+        ostsillaator.start();
+        ostsillaator.amp(0.5, 0.05); // Rünnaku aeg: 0.05 sekundit
+        ostsillaator.stop(0.5); // Peatu pärast 0.5 sekundit
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Ukulele Simulaator</h1>
+    <p>Kliki frettidel, et mängida ukulele noote!</p>
+  </body>
+</html>
